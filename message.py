@@ -12,13 +12,11 @@
 import pygame
 
 import account
+from account import PPS
 import text
 from ui.text_box import TextBox
 
 BOX = pygame.transform.scale(pygame.image.load("res/box.png"), (32, 32))
-PPS = []
-for i in range(8):
-    PPS.append(pygame.image.load("res/styles/pp_"+str(i)+".png"))
 
 
 class Message:
@@ -38,7 +36,7 @@ class Message:
 
     def is_owner(self):
         local_account = account.get_local_account()
-        return -1 == self.__sender_id
+        return local_account is not None and local_account.get_id() == self.__sender_id
 
     def get_rendered_surface_height(self):
         text_box = TextBox(self.__content, 0, 0, 256, text.get_font(20))
@@ -48,16 +46,14 @@ class Message:
 
     def get_rendered_surface(self):
         local_account = account.get_local_account()
-        account_id = -1
         pp_index = 0
         if local_account is not None:
-            account_id = local_account.get_id()
             pp_index = local_account.get_picture_index()
 
         offset = 8
         txtbox_x = 0
         pp_x = 256+(offset*2)
-        if account_id != self.__sender_id:
+        if not self.is_owner():
             txtbox_x = 64
             pp_x = 0
         text_box = TextBox(self.__content, offset+txtbox_x, offset, 256, text.get_font(20))

@@ -17,7 +17,6 @@ from message import Message
 PRIVATE_ICON = pygame.image.load("res/private.png")
 TEXT_CHAT_ICON = pygame.image.load("res/message.png")
 VOICE_CHAT_ICON = pygame.image.load("res/voice_chat.png")
-BUTTONS = pygame.image.load("res/buttons.png")
 
 
 class Channel:

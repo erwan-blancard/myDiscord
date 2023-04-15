@@ -2,6 +2,7 @@ import pygame
 import text
 from message import Message
 from ui.button_slider import *
+import account
 
 
 class ScrollingMessageList:
@@ -34,7 +35,7 @@ class ScrollingMessageList:
                 pos_x = self.width - message_surf.get_width()
 
             surf.blit(message_surf, (pos_x, 32))
-            sender_name = str(self.__message_list[i].get_sender_id())
+            sender_name = account.get_name_by_id(self.__message_list[i].get_sender_id())
             text.draw_text(sender_name, pos_x + 16 + (int(self.__message_list[i].is_owner()) * (message_surf.get_width() - text.get_font(20).size(sender_name)[0] - 32)), y_offset + 10, board, text.get_font(20))
 
             board.blit(surf, (0, y_offset))

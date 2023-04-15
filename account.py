@@ -10,6 +10,13 @@
 | picture_index | int          | YES  |     | 0       |                |
 +---------------+--------------+------+-----+---------+----------------+
 """
+import json
+
+import pygame
+
+PPS = []
+for i in range(8):
+    PPS.append(pygame.image.load("res/styles/pp_"+str(i)+".png"))
 
 
 class Account:
@@ -40,8 +47,37 @@ class Account:
         return self.__picture_index
 
 
-local_account: Account = None
+_local_account: Account = None
+
+_accounts: list[Account] = []
+
+
+def set_local_account(account: Account):
+    global _local_account
+    _local_account = account
+    try:
+        file = open("last_profile.json", "w")
+        json.dump({"email": account.get_email()}, file, indent=4)
+        file.close()
+    except IOError as e:
+        print(e)
 
 
 def get_local_account():
-    return local_account
+    return _local_account
+
+
+def get_accounts():
+    return _accounts
+
+
+def set_accounts(accounts: list[Account]):
+    global _accounts
+    _accounts = accounts
+
+
+def get_name_by_id(id: int):
+    for account in _accounts:
+        if account.get_id() == id:
+            return account.get_name()
+    return "User#"+str(id)
