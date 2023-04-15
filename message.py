@@ -45,10 +45,7 @@ class Message:
         return 16+text_box.get_height()
 
     def get_rendered_surface(self):
-        local_account = account.get_local_account()
-        pp_index = 0
-        if local_account is not None:
-            pp_index = local_account.get_picture_index()
+        pp_index = account.get_picture_index(self.__sender_id)
 
         offset = 8
         txtbox_x = 0

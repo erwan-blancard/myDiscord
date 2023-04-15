@@ -9,6 +9,7 @@
 | password   | varchar(255) | YES  |     | NULL    |                |
 +------------+--------------+------+-----+---------+----------------+
 """
+
 import pygame
 
 import text
@@ -17,6 +18,8 @@ from message import Message
 PRIVATE_ICON = pygame.image.load("res/private.png")
 TEXT_CHAT_ICON = pygame.image.load("res/message.png")
 VOICE_CHAT_ICON = pygame.image.load("res/voice_chat.png")
+
+HEIGHT = 32
 
 
 class Channel:
@@ -44,9 +47,12 @@ class Channel:
     def get_messages(self):
         return self.__messages
 
+    def get_label_height(self):
+        return HEIGHT
+
     def get_rendered_label(self):
         label_size = 192
-        surf = pygame.Surface((label_size+32, 32), pygame.SRCALPHA)
+        surf = pygame.Surface((label_size+32, HEIGHT), pygame.SRCALPHA)
         color = (120, 120, 120)
         pygame.draw.circle(surf, color, (16, 16), 16)
         pygame.draw.circle(surf, color, (label_size+16, 16), 16)

@@ -25,11 +25,6 @@ class NetworkManager:
         )
         self.__db_cursor = self.__db.cursor()
 
-        self.__connected = False
-
-    def is_connected(self):
-        return self.__connected
-
     def create_account(self, name, lastname, email, password, picture_index=random.randint(0, 7)):
         try:
             hashed_password = hashlib.sha256(password.encode())
@@ -38,7 +33,7 @@ class NetworkManager:
             self.__db.commit()
             return True
         except Exception as e:
-            print("Impossible d\'exécuter la requête:", str(e))
+            print("CREATE_ACCOUNT: Impossible d\'exécuter la requête:", e)
             return False
 
     def account_exists(self, email):
@@ -49,7 +44,7 @@ class NetworkManager:
             if len(records) > 0:
                 return True
         except Exception as e:
-            print("Impossible d\'exécuter la requête:", str(e))
+            print("ACCOUNT_EXISTS: Impossible d\'exécuter la requête:", e)
             return True
         return False
 
@@ -74,7 +69,7 @@ class NetworkManager:
                     _connected = True
                     return 1
             except Exception as e:
-                print("Impossible d\'exécuter la requête:", e)
+                print("CONNECT_AS: Impossible d\'exécuter la requête:", e)
                 return -2
         return 0
 
@@ -83,7 +78,7 @@ class NetworkManager:
         Returns a list of accounts to account._accounts
         """
         accounts: list[account.Account] = []
-        cmnd = "SELECT * FROM account;"
+        cmnd = "SELECT id, name, lastname, email, picture_index FROM account;"
         try:
             self.__db_cursor.execute(cmnd)
             records = self.__db_cursor.fetchall()
@@ -91,7 +86,7 @@ class NetworkManager:
                 accounts.append(account.Account(row[0], row[1], row[2], row[3], row[4]))
             account.set_accounts(accounts)
         except Exception as e:
-            print("Impossible d\'exécuter la requête:", e)
+            print("GET_ALL_ACCOUNTS: Impossible d\'exécuter la requête:", e)
 
     def get_channels(self):
         channels: list[Channel] = []
@@ -102,18 +97,22 @@ class NetworkManager:
             for row in records:
                 channels.append(Channel(row[0], row[1], row[2], row[3]))
         except Exception as e:
-            print("Impossible d\'exécuter la requête:", e)
+            print("GET_CHANNELS: Impossible d\'exécuter la requête:", e)
 
         return channels
 
     def create_channel(self, name, is_private, is_voice_chat, password):
         hashed_password = hashlib.sha256(password.encode())
-        cmnd = "INSERT INTO channel (name, private, voice_chat, password) VALUES ('"+name+"', '"+str(int(is_private))+"', '"+str(int(is_voice_chat))+"', '"+hashed_password.hexdigest()+"');"
+        cmnd = "INSERT INTO channel (name, private, voice_chat, password) VALUES ('" + name + "', '" + str(int(is_private)) + "', '" + str(int(is_voice_chat)) + "', '" + hashed_password.hexdigest() + "');"
+        if len(password) < 1:
+            cmnd = "INSERT INTO channel (name, private, voice_chat, password) VALUES ('"+name+"', '"+str(int(is_private))+"', '"+str(int(is_voice_chat))+"', '');"
         try:
             self.__db_cursor.execute(cmnd)
             self.__db.commit()
+            return True
         except Exception as e:
-            print("Impossible d\'exécuter la requête:", e)
+            print("CREATE_CHANNEL: Impossible d\'exécuter la requête:", e)
+            return False
 
     def is_channel_password_valid(self, channel_id, password):
         hashed_password = hashlib.sha256(password.encode())
@@ -126,7 +125,7 @@ class NetworkManager:
                     return True
                 break
         except Exception as e:
-            print("Impossible d\'exécuter la requête:", e)
+            print("IS_CHANNEL_PASSWORD_VALID: Impossible d\'exécuter la requête:", e)
 
         return False
 
@@ -139,7 +138,7 @@ class NetworkManager:
             for row in records:
                 messages.append(Message(row[0], row[1], row[2], row[3], row[4]))
         except Exception as e:
-            print("Impossible d\'exécuter la requête:", e)
+            print("GET_CHANNEL_MESSAGES: Impossible d\'exécuter la requête:", e)
 
         return messages
 
@@ -151,9 +150,16 @@ class NetworkManager:
                 self.__db.commit()
                 return True
             except Exception as e:
-                print("Impossible d\'exécuter la requête:", e)
+                print("SEND_MESSAGE: Impossible d\'exécuter la requête:", e)
 
         return False
+
+
+def disconnect():
+    global _connected
+    account._accounts = None
+    account._local_account = None
+    _connected = False
 
 
 _net_manager = NetworkManager()

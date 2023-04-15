@@ -15,6 +15,9 @@ class ButtonTextInput(BaseButton):
         self.__mouse_inside = False
         self.__mouse_clicked = False
 
+    def clear_text(self):
+        self.__text = ""
+
     def get_text(self):
         return self.__text
 

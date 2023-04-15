@@ -71,6 +71,13 @@ def get_accounts():
     return _accounts
 
 
+def get_picture_index(account_id):
+    for account in _accounts:
+        if account.get_id() == account_id:
+            return account.get_picture_index()
+    return 0
+
+
 def set_accounts(accounts: list[Account]):
     global _accounts
     _accounts = accounts
@@ -79,5 +86,5 @@ def set_accounts(accounts: list[Account]):
 def get_name_by_id(id: int):
     for account in _accounts:
         if account.get_id() == id:
-            return account.get_name()
+            return account.get_fullname()
     return "User#"+str(id)
