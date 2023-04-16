@@ -1,13 +1,11 @@
 import pygame
 
 from app_board import AppBoard
-from channel import Channel
-from message import Message
 import network_manager
+from overlays.login_fail_overlay import LoginFailOverlay
 from overlays.login_overlay import LoginOverlay
 from overlays.overlay import *
 import overlays.overlay
-from ui.scrolling_message_list import ScrollingMessageList
 
 pygame.init()
 if not pygame.font.get_init():
@@ -63,7 +61,10 @@ while running:
         overlay_list.append(overlays.overlay.next_overlay)
         overlays.overlay.next_overlay = None
 
-    if len(overlay_list) == 0 and not network_manager.is_connected():
+    if network_manager.get_instance().connect_failure():
+        if len(overlay_list) == 0:
+            overlay_list.append(LoginFailOverlay(network_manager.get_instance().connect_failure_trace()))
+    elif len(overlay_list) == 0 and not network_manager.is_connected():
         overlay_list.append(LoginOverlay())
 
     for overlay in overlay_list:

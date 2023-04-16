@@ -15,15 +15,28 @@ TIME_FORMAT = "{:02d}:{:02d}"
 class NetworkManager:
 
     def __init__(self):
-        file = open("target_server.json", "r")
-        target_server = json.load(file)
-        file.close()
-        self.__db = mysql.connector.connect(
-            host=target_server["host"], user=target_server["user"],
-            password=target_server["password"],
-            database=target_server["database"]
-        )
-        self.__db_cursor = self.__db.cursor()
+        self.__connect_failure = False
+        self.__connect_failure_trace = ""
+        try:
+            file = open("target_server.json", "r")
+            target_server = json.load(file)
+            file.close()
+            self.__db = mysql.connector.connect(
+                host=target_server["host"], user=target_server["user"],
+                password=target_server["password"],
+                database=target_server["database"]
+            )
+            self.__db_cursor = self.__db.cursor()
+        except Exception as e:
+            print("NetworkManager Constructor Error:", e)
+            self.__connect_failure = True
+            self.__connect_failure_trace = str(e)
+
+    def connect_failure(self):
+        return self.__connect_failure
+
+    def connect_failure_trace(self):
+        return self.__connect_failure_trace
 
     def create_account(self, name, lastname, email, password, picture_index=random.randint(0, 7)):
         try:
@@ -184,3 +197,8 @@ def is_connected():
 
 def get_instance():
     return _net_manager
+
+
+def new_instance():
+    global _net_manager
+    _net_manager = NetworkManager()

@@ -22,7 +22,7 @@ class GenericOverlay(Overlay):
         frame.fill((120, 120, 120))
         text.draw_aligned_text(self.title, OVL_SIZE / 2, 32, frame, text.get_font(48), shadow_color=(80, 80, 80), shadow_offset=6)
 
-        message_box = TextBox(self.message, 80, 200, 320, text.get_font(24))
+        message_box = TextBox(self.message, 80, 160, 320, text.get_font(24), line_limit=9)
         message_box.render(frame)
 
         self._render_buttons(frame)

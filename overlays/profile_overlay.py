@@ -1,6 +1,8 @@
 import account
 import network_manager
+import overlays.overlay
 import ui.button_base
+from overlays.generic_overlay import GenericOverlay
 from overlays.overlay import *
 from ui.button_text_input import ButtonTextInput
 
@@ -34,15 +36,14 @@ class ProfileOverlay(Overlay):
         self.__lastname_button = ButtonTextInput(100, 170 - 32, 280, 32, default_text=self.__cached_local_account.get_lastname(), lock=True)
         self.__email_button = ButtonTextInput(100, 220 - 32, 280, 32, default_text=self.__cached_local_account.get_email(), lock=True)
 
-        self.show_error_message = False
-
     def __save_and_close(self):
         success = network_manager.get_instance().change_profile_picture(self.picture_index)
         if success:
             self.close()
             network_manager.get_instance().get_all_accounts()
+            overlays.overlay.next_overlay = GenericOverlay(title="Image Changée !", message="L'image de votre profil à été changé !")
         else:
-            self.show_error_message = True
+            overlays.overlay.next_overlay = GenericOverlay(title="Oups !", message="Une erreur est survenu lors du changement de votre image de profil.")
 
     def prev_pp(self):
         if self.picture_index > 0:

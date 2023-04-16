@@ -5,16 +5,19 @@ from ui.button_base import *
 
 class ButtonTextInput(BaseButton):
 
-    def __init__(self, x, y, width, height, default_text="", font=text.font(), color=text.DEFAULT_COLOR, hide_text: bool = False, lock=False):
+    def __init__(self, x, y, width, height, default_text="", font=text.font(), color=text.DEFAULT_COLOR, hide_text: bool = False, lock=False, focused=False):
         super().__init__(x, y, width, height, None)
         self.__text = default_text
         self.font = font
         self.color = color
-        self.__focused = False
+        self.__focused = focused
         self.__hide_text = hide_text
         self.__mouse_inside = False
         self.__mouse_clicked = False
         self.__locked = lock
+
+    def is_focused(self):
+        return self.__focused
 
     def clear_text(self):
         self.__text = ""
