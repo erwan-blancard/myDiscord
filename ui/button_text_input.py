@@ -5,7 +5,7 @@ from ui.button_base import *
 
 class ButtonTextInput(BaseButton):
 
-    def __init__(self, x, y, width, height, default_text="", font=text.font(), color=text.DEFAULT_COLOR, hide_text: bool = False):
+    def __init__(self, x, y, width, height, default_text="", font=text.font(), color=text.DEFAULT_COLOR, hide_text: bool = False, lock=False):
         super().__init__(x, y, width, height, None)
         self.__text = default_text
         self.font = font
@@ -14,9 +14,13 @@ class ButtonTextInput(BaseButton):
         self.__hide_text = hide_text
         self.__mouse_inside = False
         self.__mouse_clicked = False
+        self.__locked = lock
 
     def clear_text(self):
         self.__text = ""
+
+    def set_lock(self, val: bool):
+        self.__locked = val
 
     def get_text(self):
         return self.__text
@@ -36,14 +40,14 @@ class ButtonTextInput(BaseButton):
         else:
             self.__mouse_clicked = False
 
-        if self.__mouse_inside and self.__mouse_clicked:
+        if not self.__locked and self.__mouse_inside and self.__mouse_clicked:
             self.__focused = True
 
         if self.__mouse_clicked and not self.__mouse_inside:
             self.__focused = False
 
     def key_input(self, event: pygame.event.Event):
-        if event.type == pygame.KEYDOWN and self.__focused:
+        if not self.__locked and event.type == pygame.KEYDOWN and self.__focused:
             if event.key == pygame.K_RETURN:
                 self.__focused = False
             elif event.key == pygame.K_BACKSPACE:

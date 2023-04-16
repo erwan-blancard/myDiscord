@@ -3,6 +3,7 @@ import time
 
 import pygame
 
+import account
 import network_manager
 import overlays.overlay
 import text
@@ -10,6 +11,7 @@ import ui.button_base
 from channel import Channel
 from overlays.add_channel_overlay import AddChannelOverlay
 from overlays.disconnect_overlay import DisconnectOverlay
+from overlays.profile_overlay import ProfileOverlay
 from ui.button_base import BaseButton
 from ui.button_icon import ButtonIcon
 from ui.button_text_input import ButtonTextInput
@@ -59,7 +61,20 @@ class AppBoard:
         text.draw_centered_text("Se déconnecter", self.disconnect_img.get_width() / 2, self.disconnect_img.get_height() / 2, self.disconnect_img, text.get_font(24))
         self.__disconnect_button = ButtonIcon(pygame.display.get_window_size()[0]-8-200, 3, 200, 40, self.disconnect_img, command=lambda: self.open_disconnect_menu())
 
+        self.__cached_local_account = account.get_local_account()
+        self.profile_image = self.create_profile_button_image()
+        self.__profile_button = ButtonIcon(self.__add_channel_button.x + self.__add_channel_button.width + 4, self.__add_channel_button.y, 40, 40, self.profile_image, command=lambda: self.open_profile_overlay())
+
         self.update_client()
+
+    def create_profile_button_image(self):
+        img = ui.button_base.create_button_surface(40)
+        pp = account.PPS[self.__cached_local_account.get_picture_index()]
+        img.blit(pp, (20-pp.get_width()/2, 20-pp.get_height()/2))
+        return img
+
+    def open_profile_overlay(self):
+        overlays.overlay.next_overlay = ProfileOverlay()
 
     def open_disconnect_menu(self):
         overlays.overlay.next_overlay = DisconnectOverlay()
@@ -155,6 +170,11 @@ class AppBoard:
             if channel_id != -1 and channel_id != self.__current_channel_id:
                 self.set_channel(channel_id, erase_message_list=True)
 
+        # check for account change (pp)
+        if self.__cached_local_account.get_picture_index() != account.get_local_account().get_picture_index():
+            self.__cached_local_account = account.get_local_account()
+            self.__profile_button.set_icon(self.create_profile_button_image())
+
     def render(self, screen: pygame.Surface):
         def render_messages():
             if not self.channels[self.__cached_channel_index].is_voice_chat():  # text chat
@@ -181,10 +201,12 @@ class AppBoard:
                     else:
                         channel_name += c
             text.draw_text(channel_name, MESSAGE_LIST_POS[0] + 8, 8, screen, text.get_font(24))
+
         pygame.draw.rect(screen, (40, 40, 40), (0, 0, pygame.display.get_window_size()[0], MESSAGE_LIST_POS[1]))
 
         self.__add_channel_button.render(screen)
         self.__disconnect_button.render(screen)
+        self.__profile_button.render(screen)
         if self.__current_channel_id != -1 and self.__cached_message_list is not None:     # render channel chat
             render_channel_name()
 
@@ -203,6 +225,7 @@ class AppBoard:
     def input(self, event: pygame.event.Event):
         self.__add_channel_button.mouse_input(event)
         self.__disconnect_button.mouse_input(event)
+        self.__profile_button.mouse_input(event)
         if self.__pending_password_check:
             self.__password_input.mouse_input(event)
             self.__password_input.key_input(event)

@@ -80,7 +80,10 @@ def get_picture_index(account_id):
 
 def set_accounts(accounts: list[Account]):
     global _accounts
+    global _local_account
     _accounts = accounts
+    if _local_account is not None:
+        _local_account = get_account_by_id(_local_account.get_id())
 
 
 def get_name_by_id(id: int):
@@ -88,3 +91,10 @@ def get_name_by_id(id: int):
         if account.get_id() == id:
             return account.get_fullname()
     return "User#"+str(id)
+
+
+def get_account_by_id(id: int):
+    for account in _accounts:
+        if account.get_id() == id:
+            return account
+    return None

@@ -154,6 +154,17 @@ class NetworkManager:
 
         return False
 
+    def change_profile_picture(self, new_pp: int):
+        if account.get_local_account() is not None and 0 <= new_pp < len(account.PPS):
+            cmnd = "UPDATE account SET picture_index="+str(new_pp)+" WHERE id="+str(account.get_local_account().get_id())+";"
+            try:
+                self.__db_cursor.execute(cmnd)
+                self.__db.commit()
+                return True
+            except Exception as e:
+                print("CHANGE_PROFILE_PICTURE: Impossible d\'exécuter la requête:", e)
+        return False
+
 
 def disconnect():
     global _connected
