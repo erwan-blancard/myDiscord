@@ -7,13 +7,14 @@ import account
 
 class ScrollingMessageList:
 
-    def __init__(self, message_list: list[Message], x, y, width, height, scroll_pos=0.0):
+    def __init__(self, message_list: list[Message], x, y, width, height, scroll_pos=0.0, scroll_bar_focus=False):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.scroll_bar = ButtonSliderVertical(self.x + self.width - 4, self.y, self.height, 4)
         self.scroll_bar.set_scroll_pos(scroll_pos)
+        self.scroll_bar.mouse_focus = scroll_bar_focus
         self.__message_list = message_list
         self.__cached_board_surface = self.create_cached_board_surface()
 

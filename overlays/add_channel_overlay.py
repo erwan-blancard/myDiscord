@@ -62,6 +62,8 @@ class AddChannelOverlay(Overlay):
     def input(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
             self.warning_message = ""
+            if event.key == pygame.K_ESCAPE:
+                self.close()
         super().input(event)
         self.__channel_name_button.mouse_input(event, relative_to=(int(pygame.display.get_window_size()[0]/2 - OVL_SIZE/2), int(pygame.display.get_window_size()[1]/2 - OVL_SIZE/2)))
         self.__channel_name_button.key_input(event)

@@ -15,6 +15,7 @@ from ui.button_icon import ButtonIcon
 from ui.button_text_input import ButtonTextInput
 from ui.scrolling_message_list import ScrollingMessageList
 from ui.scrolling_channel_list import ScrollingChannelList
+from ui.text_box import TextBox
 
 NEXT_UPDATE = 7    # in seconds
 
@@ -36,7 +37,7 @@ class AppBoard:
 
         add_channel_img = ui.button_base.create_button_surface(192)
         text.draw_centered_text("Ajouter...", add_channel_img.get_width() / 2, add_channel_img.get_height() / 2, add_channel_img, text.get_font(24))
-        self.__add_channel_button = ButtonIcon(8, 8, 192, 40, add_channel_img, command=lambda: self.open_add_channel_overlay())
+        self.__add_channel_button = ButtonIcon(8, 3, 192, 40, add_channel_img, command=lambda: self.open_add_channel_overlay())
 
         self.__message_input = ButtonTextInput(MESSAGE_LIST_POS[0], pygame.display.get_window_size()[1]-(MESSAGE_LIST_Y_OFFSET)/2, pygame.display.get_window_size()[0]-MESSAGE_LIST_POS[0]-128, 48)
         self.__pending_message = False
@@ -56,7 +57,7 @@ class AppBoard:
 
         self.disconnect_img = ui.button_base.create_button_surface(200)
         text.draw_centered_text("Se déconnecter", self.disconnect_img.get_width() / 2, self.disconnect_img.get_height() / 2, self.disconnect_img, text.get_font(24))
-        self.__disconnect_button = ButtonIcon(pygame.display.get_window_size()[0]-8-200, 8, 200, 40, self.disconnect_img, command=lambda: self.open_disconnect_menu())
+        self.__disconnect_button = ButtonIcon(pygame.display.get_window_size()[0]-8-200, 3, 200, 40, self.disconnect_img, command=lambda: self.open_disconnect_menu())
 
         self.update_client()
 
@@ -107,16 +108,23 @@ class AppBoard:
             i += 1
         if self.__current_channel_id != -1:
             scroll_pos = 1.0
+            scroll_bar_focus = False
             if self.__cached_message_list is not None:
                 scroll_pos = self.__cached_message_list.scroll_bar.get_scroll_pos()
-            self.__cached_message_list = ScrollingMessageList(network_manager.get_instance().get_channel_messages(self.__current_channel_id), MESSAGE_LIST_POS[0], MESSAGE_LIST_POS[1], pygame.display.get_window_size()[0] - MESSAGE_LIST_POS[0], pygame.display.get_window_size()[1] - MESSAGE_LIST_Y_OFFSET, scroll_pos=scroll_pos)
+                scroll_bar_focus = self.__cached_message_list.scroll_bar.mouse_focus
+            self.__cached_message_list = ScrollingMessageList(network_manager.get_instance().get_channel_messages(self.__current_channel_id), MESSAGE_LIST_POS[0], MESSAGE_LIST_POS[1], pygame.display.get_window_size()[0] - MESSAGE_LIST_POS[0], pygame.display.get_window_size()[1] - MESSAGE_LIST_Y_OFFSET, scroll_pos=scroll_pos, scroll_bar_focus=scroll_bar_focus)
 
     def __thread_update(self):
         channels = network_manager.get_instance().get_channels()    # fetch channels
         network_manager.get_instance().get_all_accounts()           # fetch accounts
 
         self.channels = channels
-        self.__cached_channel_list = ScrollingChannelList(self.channels, 8, 56, pygame.display.get_window_size()[1]-56)
+        scroll_pos = 0.0
+        scroll_bar_focus = False
+        if self.__cached_channel_list is not None:
+            scroll_pos = self.__cached_channel_list.scroll_bar.get_scroll_pos()
+            scroll_bar_focus = self.__cached_channel_list.scroll_bar.mouse_focus
+        self.__cached_channel_list = ScrollingChannelList(self.channels, 8, 56, pygame.display.get_window_size()[1]-56, scroll_pos=scroll_pos, scroll_bar_focus=scroll_bar_focus)
         if self.__current_channel_id != -1:
             self.set_channel(self.__current_channel_id)
 
@@ -129,22 +137,22 @@ class AppBoard:
         self.__update_pending = True
 
     def update_channel_and_message_list_size(self):
-        self.__disconnect_button = ButtonIcon(pygame.display.get_window_size()[0] - 8 - 200, 8, 200, 40, self.disconnect_img, command=lambda: self.open_disconnect_menu())
+        self.__disconnect_button = ButtonIcon(pygame.display.get_window_size()[0] - 8 - 200, 3, 200, 40, self.disconnect_img, command=lambda: self.open_disconnect_menu())
         self.__password_input = ButtonTextInput(MESSAGE_LIST_POS[0] + 32, pygame.display.get_window_size()[1] / 2, 284, 40, default_text=self.__password_input.get_text(), hide_text=True)
         self.__validate_password = ButtonIcon(MESSAGE_LIST_POS[0] + 32+284, pygame.display.get_window_size()[1] / 2, 128, 40, self.validate_password_img, command=lambda: self.__validate_channel_password())
         if self.__cached_message_list is not None:
-            self.__cached_message_list = ScrollingMessageList(self.__cached_message_list.get_message_list(), MESSAGE_LIST_POS[0], MESSAGE_LIST_POS[1], pygame.display.get_window_size()[0]-MESSAGE_LIST_POS[0], pygame.display.get_window_size()[1]-MESSAGE_LIST_Y_OFFSET, scroll_pos=self.__cached_message_list.scroll_bar.get_scroll_pos())
+            self.__cached_message_list = ScrollingMessageList(self.__cached_message_list.get_message_list(), MESSAGE_LIST_POS[0], MESSAGE_LIST_POS[1], pygame.display.get_window_size()[0]-MESSAGE_LIST_POS[0], pygame.display.get_window_size()[1]-MESSAGE_LIST_Y_OFFSET, scroll_pos=self.__cached_message_list.scroll_bar.get_scroll_pos(), scroll_bar_focus=self.__cached_message_list.scroll_bar.mouse_focus)
             self.__message_input = ButtonTextInput(MESSAGE_LIST_POS[0], pygame.display.get_window_size()[1]-(MESSAGE_LIST_Y_OFFSET)/2, pygame.display.get_window_size()[0]-MESSAGE_LIST_POS[0]-128, 48, default_text=self.__message_input.get_text())
             self.__send_message_button = ButtonIcon(MESSAGE_LIST_POS[0]+pygame.display.get_window_size()[0]-MESSAGE_LIST_POS[0]-128, pygame.display.get_window_size()[1]-(MESSAGE_LIST_Y_OFFSET)/2, 128, 48, self.send_message_img, command=lambda: self.__send_message())
         if self.__cached_channel_list is not None:
-            self.__cached_channel_list = ScrollingChannelList(self.__cached_channel_list.get_channel_list(), 8, 56, pygame.display.get_window_size()[1]-56, scroll_pos=self.__cached_channel_list.scroll_bar.get_scroll_pos())
+            self.__cached_channel_list = ScrollingChannelList(self.__cached_channel_list.get_channel_list(), 8, 56, pygame.display.get_window_size()[1]-56, scroll_pos=self.__cached_channel_list.scroll_bar.get_scroll_pos(), scroll_bar_focus=self.__cached_channel_list.scroll_bar.mouse_focus)
 
     def update(self):
         if time.time() > self.__last_update_time + NEXT_UPDATE and not self.__update_pending:
             self.update_client()
         if self.__cached_channel_list is not None:
             channel_id = self.__cached_channel_list.get_selected_channel_id()
-            if channel_id != -1:
+            if channel_id != -1 and channel_id != self.__current_channel_id:
                 self.set_channel(channel_id, erase_message_list=True)
 
     def render(self, screen: pygame.Surface):
@@ -160,9 +168,26 @@ class AppBoard:
                 text.draw_aligned_text("Bienvenue dans un channel vocal!", screen.get_width() / 2 + 250 / 2, screen.get_height()/2 - 24, screen, text.get_font(24))
                 text.draw_aligned_text("(pas implémenté)", screen.get_width() / 2 + 250 / 2, screen.get_height()/2 + 24, screen, text.get_font(24))
 
+        def render_channel_name():
+            channel_name = "#"+self.channels[self.__cached_channel_index].get_name()
+            if text.get_font(24).size(channel_name)[0] > pygame.display.get_window_size()[0] - MESSAGE_LIST_POS[0] - self.__disconnect_button.width - 16:
+                fullname = channel_name
+                channel_name = ""
+                for c in fullname:
+                    if text.get_font(24).size(channel_name)[0] > pygame.display.get_window_size()[0] - MESSAGE_LIST_POS[0] - self.__disconnect_button.width - 16:
+                        channel_name = channel_name[:-3]
+                        channel_name += "..."
+                        break
+                    else:
+                        channel_name += c
+            text.draw_text(channel_name, MESSAGE_LIST_POS[0] + 8, 8, screen, text.get_font(24))
+        pygame.draw.rect(screen, (40, 40, 40), (0, 0, pygame.display.get_window_size()[0], MESSAGE_LIST_POS[1]))
+
         self.__add_channel_button.render(screen)
         self.__disconnect_button.render(screen)
         if self.__current_channel_id != -1 and self.__cached_message_list is not None:     # render channel chat
+            render_channel_name()
+
             if self.channels[self.__cached_channel_index].is_private():
                 if not self.__pending_password_check:
                     render_messages()
